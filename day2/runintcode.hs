@@ -1,7 +1,7 @@
 import Intcode
 
 getOutput :: State -> String
-getOutput state = show $ (memory state) !! 0
+getOutput state = (show . head . memory) state
 
 initProgram :: Memory -> State
 initProgram contents = State { pointer = 0, memory = contents }

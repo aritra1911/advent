@@ -1,8 +1,8 @@
 GHC = ghc
-OPTIONS_GHC = -dynamic
+OPTIONS_GHC = -dynamic --make
 
 fuel: intcode.hs
-	$(GHC) $(OPTIONS_GHC) intcode.hs
+	$(GHC) $(OPTIONS_GHC) runintcode.hs intcode.hs
 
 clean:
-	$(RM) *.hi *.o intcode
+	$(RM) runintcode *.hi *.o
