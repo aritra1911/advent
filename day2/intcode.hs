@@ -1,3 +1,9 @@
+module Intcode
+( Memory
+, State(..)
+, run
+) where
+
 type Memory = [Int]
 
 -- Here `pointer` refers to the instruction pointer
@@ -40,33 +46,17 @@ eval MUL x y = Just $ x * y
 eval HLT _ _ = Nothing
 eval NOP _ _ = Nothing
 
-execute :: State -> State
-execute state =
+run :: State -> State
+run state =
     let opcode  = intToOpcode $ (memory state) !! (pointer state)
         nextPtr = (pointer state) + (stepVal opcode)
         result  = eval opcode (val $ arg 1) (val $ arg 2)
     in case result of
-        Just x  -> execute $ State { pointer = nextPtr
-                                   , memory  = setAt (arg 3) x (memory state)
-                                   }
+        Just x  -> run $ State { pointer = nextPtr
+                               , memory  = setAt (arg 3) x (memory state)
+                               }
         Nothing -> State { pointer = nextPtr
                          , memory = memory state
                          }
     where arg x = (memory state) !! ((pointer state) + x)
           val x = (memory state) !! x
-
-getOutput :: State -> String
-getOutput state = show $ (memory state) !! 0
-
-initExec :: Memory -> State
-initExec contents = State { pointer = 0, memory = contents }
-
-parse :: String -> Memory
-parse input = read $ '[':input ++ "]"
-
-restore1202 :: Memory -> Memory
-restore1202 (x:_:_:rest) = x:12:02:rest
-
-main = do
-    input <- getContents
-    putStrLn $ (getOutput . execute . initExec . restore1202 . parse) input
