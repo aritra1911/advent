@@ -2,6 +2,9 @@ module Intcode
 ( Memory
 , State(..)
 , run
+, initProgram
+, getOutput
+, parse
 ) where
 
 type Memory = [Int]
@@ -60,3 +63,12 @@ run state =
                          }
     where arg x = (memory state) !! ((pointer state) + x)
           val x = (memory state) !! x
+
+initProgram :: Memory -> State
+initProgram contents = State { pointer = 0, memory = contents }
+
+getOutput :: State -> Int
+getOutput state = (head . memory) state
+
+parse :: String -> Memory
+parse input = read $ '[':input ++ "]"

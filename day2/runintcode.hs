@@ -1,18 +1,12 @@
 import Intcode
 
-getOutput :: State -> String
-getOutput state = (show . head . memory) state
-
-initProgram :: Memory -> State
-initProgram contents = State { pointer = 0, memory = contents }
-
-parse :: String -> Memory
-parse input = read $ '[':input ++ "]"
-
-restore1202 :: Memory -> Memory
-restore1202 (x:_:_:rest) = x:12:02:rest
-restore1202 mem = mem
+restore :: Int -> Memory -> Memory
+restore nounverb (x:_:_:rest) =
+    let noun = nounverb `div` 100
+        verb = nounverb `mod` 100
+    in x:noun:verb:rest
+restore _ program = program
 
 main = do
     input <- getContents
-    putStrLn $ (getOutput . run . initProgram . restore1202 . parse) input
+    print $ (getOutput . run . initProgram . (restore 1202) . parse) input
