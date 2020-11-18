@@ -1,8 +1,13 @@
 GHC = ghc
 OPTIONS_GHC = -dynamic --make
 
-fuel: intcode.hs
+all: runintcode findnounverb
+
+runintcode: runintcode.hs intcode.hs
 	$(GHC) $(OPTIONS_GHC) runintcode.hs intcode.hs
 
+findnounverb: findnounverb.hs intcode.hs
+	$(GHC) $(OPTIONS_GHC) findnounverb.hs intcode.hs
+
 clean:
-	$(RM) runintcode *.hi *.o
+	$(RM) runintcode findnounverb *.hi *.o

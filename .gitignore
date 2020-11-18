@@ -1,3 +1,5 @@
 *.hi
 *.o
+day1/fuel
 day2/runintcode
+day2/findnounverb

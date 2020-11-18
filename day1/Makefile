@@ -1,5 +1,5 @@
 GHC = ghc
-OPTIONS_GHC = -dynamic
+OPTIONS_GHC = -dynamic --make
 
 fuel: fuel.hs
 	$(GHC) $(OPTIONS_GHC) fuel.hs
