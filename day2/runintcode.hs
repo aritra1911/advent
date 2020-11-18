@@ -8,5 +8,5 @@ restore nounverb (x:_:_:rest) =
 restore _ program = program
 
 main = do
-    input <- getContents
+    input <- readFile "input.txt"
     print $ (getOutput . run . initProgram . (restore 1202) . parse) input
