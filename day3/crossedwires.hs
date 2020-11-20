@@ -1,7 +1,29 @@
-data Move d = Up d | Left' d | Down d | Right' d
+data Point = Point Int Int deriving (Show, Eq)
+
+data Move = Up Int | Left' Int | Down Int | Right' Int
     deriving (Show, Eq)
 
-parseMove :: String -> Move Int
+nudge :: Point -> Move -> Point
+nudge (Point x y) move =
+    case move of
+        Up     dist -> Point x (y + dist)
+        Left'  dist -> Point (x - dist) y
+        Down   dist -> Point x (y - dist)
+        Right' dist -> Point (x + dist) y
+
+getPath :: Point -> [Move] -> [Point]
+getPath start [] = [start]
+getPath start (move:rest_moves) = start : (getPath newPoint rest_moves)
+    where newPoint = start `nudge` move
+
+-- These two functions do the same exact thing. I personally prefer the above recursive implementation because of it's
+-- verbosity and it keeps it in order, but I'm keeping the below one as well just for the sake of demonstration.
+
+getPath' :: Point -> [Move] -> [Point]
+getPath' start moves = (reverse . foldl stitch [start]) moves
+    where stitch (point:rest_points) move = (point `nudge` move) : point : rest_points
+
+parseMove :: String -> Move
 parseMove (move:distance) =
     case move of
         'U' -> Up     $ read distance
@@ -9,8 +31,9 @@ parseMove (move:distance) =
         'D' -> Down   $ read distance
         'R' -> Right' $ read distance
 
-parseInput :: String -> [Move Int]
-parseInput = map parseMove . words . map commasToSpaces
-    where commasToSpaces c = if c == ',' then ' ' else c
+parseInput :: String -> [Move]
+parseInput = map parseMove . words . map commaToSpace
+    where commaToSpace c = if c == ',' then ' ' else c
 
-main = interact $ unlines . map show . map parseInput . lines
+main = interact $ unlines . map show . map (getPath centralPort) . map parseInput . lines
+    where centralPort = Point 0 0

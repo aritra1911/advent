@@ -14,7 +14,7 @@ data State = State { pointer :: Int
                    , memory  :: Memory
                    } deriving (Show, Eq)
 
-data OpCode = NOP | ADD | MUL | HLT deriving (Show, Eq, Ord)
+data OpCode = NOP | ADD | MUL | HLT deriving (Show, Eq, Ord, Bounded, Enum)
 
 -- Memory contents doesn't matter when comparing states
 instance Ord State where
