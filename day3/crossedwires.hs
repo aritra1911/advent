@@ -1,15 +1,15 @@
-data Point = Point Int Int deriving (Show, Eq)
+type Point = (Int,Int)
 
 data Move = Up Int | Left' Int | Down Int | Right' Int
     deriving (Show, Eq)
 
 nudge :: Point -> Move -> Point
-nudge (Point x y) move =
+nudge (x,y) move =
     case move of
-        Up     dist -> Point x (y + dist)
-        Left'  dist -> Point (x - dist) y
-        Down   dist -> Point x (y - dist)
-        Right' dist -> Point (x + dist) y
+        Up     dist -> (x,y + dist)
+        Left'  dist -> (x - dist,y)
+        Down   dist -> (x,y - dist)
+        Right' dist -> (x + dist,y)
 
 getPath :: Point -> [Move] -> [Point]
 getPath start [] = [start]
@@ -36,4 +36,4 @@ parseInput = map parseMove . words . map commaToSpace
     where commaToSpace c = if c == ',' then ' ' else c
 
 main = interact $ unlines . map show . map (getPath centralPort) . map parseInput . lines
-    where centralPort = Point 0 0
+    where centralPort = (0,0)
