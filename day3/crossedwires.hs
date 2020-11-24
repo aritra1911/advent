@@ -1,7 +1,36 @@
+import qualified Data.Set as Set
+
 type Point = (Int,Int)
+
+data Line = Line Point Point
+    deriving (Show, Eq)
 
 data Move = Up Int | Left' Int | Down Int | Right' Int
     deriving (Show, Eq)
+
+intersection :: (Ord a) => [a] -> [a] -> [a]
+intersection xs ys =
+    let set1 = Set.fromList xs
+        set2 = Set.fromList ys
+    in Set.toList $ Set.intersection set1 set2
+
+range :: (Enum a,Ord a) => a -> a -> [a]
+range l u
+    | l < u = [l .. u]
+    | l > u = [u .. l]
+    | otherwise = [l]
+
+getIntersections :: Line -> Line -> [Point]
+getIntersections line1 line2 =
+    let xints = intersection (xlist line1) (xlist line2)
+        yints = intersection (ylist line1) (ylist line2)
+    in case (xints,yints) of
+        ([x],[y]) -> [(x,y)]
+        ([x],ys) -> zip (replicate (length ys) x) ys
+        (xs,[y]) -> zip xs (replicate (length xs) y)
+        _ -> []
+    where xlist (Line (x1,_) (x2,_)) = range x1 x2
+          ylist (Line (_,y1) (_,y2)) = range y1 y2
 
 nudge :: Point -> Move -> Point
 nudge (x,y) move =
