@@ -52,6 +52,10 @@ getPath' :: Point -> [Move] -> [Point]
 getPath' start moves = (reverse . foldl stitch [start]) moves
     where stitch (point:rest_points) move = (point `nudge` move) : point : rest_points
 
+solidify :: [Point] -> [Line]
+solidify (p1:p2:rest_points) = (Line p1 p2) : (solidify (p2:rest_points))
+solidify _ = []
+
 parseMove :: String -> Move
 parseMove (move:distance) =
     case move of
@@ -64,5 +68,5 @@ parseInput :: String -> [Move]
 parseInput = map parseMove . words . map commaToSpace
     where commaToSpace c = if c == ',' then ' ' else c
 
-main = interact $ unlines . map show . map (getPath centralPort) . map parseInput . lines
+main = interact $ unlines . map show . map solidify . map (getPath centralPort) . map parseInput . lines
     where centralPort = (0,0)
