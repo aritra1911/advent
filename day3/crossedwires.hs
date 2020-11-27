@@ -56,6 +56,17 @@ solidify :: [Point] -> [Line]
 solidify (p1:p2:rest_points) = (Line p1 p2) : (solidify (p2:rest_points))
 solidify _ = []
 
+lineIntersectionPath :: Line -> [Line] -> [Point]
+lineIntersectionPath line path = case path of
+    [] -> []
+    (fp:rest_path) -> (getIntersections line fp) ++ lineIntersectionPath line rest_path
+
+pathIntersectionPath :: [Line] -> [Line] -> [Point]
+pathIntersectionPath path1 path2 = foldl (\acc x -> acc ++ lineIntersectionPath x path2) [] path1
+
+computeDistance :: Point -> Int
+computeDistance (x,y) = x + y
+
 parseMove :: String -> Move
 parseMove (move:distance) =
     case move of
