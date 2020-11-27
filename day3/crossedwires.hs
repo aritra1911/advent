@@ -64,6 +64,7 @@ lineIntersectionPath line path = case path of
 pathIntersectionPath :: [Line] -> [Line] -> [Point]
 pathIntersectionPath path1 path2 = foldl (\acc x -> acc ++ lineIntersectionPath x path2) [] path1
 
+-- Calculate the Manhattan distance of a point wrt origin
 computeDistance :: Point -> Int
 computeDistance (x,y) = x + y
 
@@ -79,5 +80,10 @@ parseInput :: String -> [Move]
 parseInput = map parseMove . words . map commaToSpace
     where commaToSpace c = if c == ',' then ' ' else c
 
-main = interact $ unlines . map show . map solidify . map (getPath centralPort) . map parseInput . lines
+main = do
+    inputs <- sequence $ replicate 2 getLine
+    let paths = (map solidify . map (getPath centralPort) . map parseInput) inputs
+        path1 = head paths
+        path2 = last paths
+    print $ minimum $ tail $ map computeDistance $ pathIntersectionPath path1 path2
     where centralPort = (0,0)
