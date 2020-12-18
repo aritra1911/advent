@@ -6,9 +6,17 @@ findEntries year (x:xs) =
         [] -> findEntries year xs
         (y:ys) -> Just (x,y)
 
-multiplyEntries :: Maybe (Int, Int) -> Either String Int
+findThreeEntries :: Int -> [Int] -> Maybe (Int, Int, Int)
+findThreeEntries _ [] = Nothing
+findThreeEntries _ (_:[]) = Nothing
+findThreeEntries year (x:xs) =
+    case findEntries (year - x) xs of
+        Nothing -> findThreeEntries year xs
+        Just (y,z) -> Just (x,y,z)
+
+multiplyEntries :: Maybe (Int, Int, Int) -> Either String Int
 multiplyEntries Nothing = Left "None"
-multiplyEntries (Just (e1, e2)) = Right $ e1 * e2
+multiplyEntries (Just (x,y,z)) = Right $ x * y * z
 
 showOutput :: Either String Int -> String
 showOutput value = case value of Left error -> error
@@ -18,7 +26,7 @@ main = do
     input <- readFile "input.txt"
     putStrLn $ (showOutput
               . multiplyEntries
-              . findEntries year 
+              . findThreeEntries year
               . map read 
               . lines) input
     where year = 2020
