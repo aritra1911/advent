@@ -28,6 +28,9 @@ fn main() {
     };
 
     println!("Answer to Part One : {}", get_increments(&depth_vector));
+
+    let window_sums_vector = get_window_sums(&depth_vector);
+    println!("Answer to Part Two : {}", get_increments(&window_sums_vector));
 }
 
 fn get_increments(depth_vector: &Vec<u32>) -> u32 {
@@ -41,4 +44,15 @@ fn get_increments(depth_vector: &Vec<u32>) -> u32 {
     }
 
     increments
+}
+
+fn get_window_sums(depth_vector: &Vec<u32>) -> Vec<u32> {
+
+    let mut window_sums = Vec::new();
+
+    for (first, second, third) in depth_vector.iter().tuple_windows() {
+        window_sums.push(first + second + third);
+    }
+
+    window_sums
 }
