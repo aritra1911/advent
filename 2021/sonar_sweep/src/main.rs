@@ -1,23 +1,33 @@
 use std::env;
 use std::fs::File;
-use std::io::{BufRead, BufReader};
+use std::io::{stdin, BufRead, BufReader};
 use itertools::Itertools;
 
 fn main() {
 
     let args: Vec<String> = env::args().collect();
 
-    let file = File::open(&args[1]).unwrap();
-    let reader = BufReader::new(file);
+    let depth_vector: Vec<u32> = if args.len() > 1 && args[1] != "-" {
+        let file = File::open(&args[1]).unwrap();
+        let reader = BufReader::new(file);
 
-    let depth_vector: Vec<u32> = reader.lines()
-                                       .map(|depth| depth.unwrap()
-                                                         .trim()
-                                                         .parse()
-                                                         .unwrap())
-                                       .collect();
+        reader.lines()
+              .map(|depth| depth.unwrap()
+                                .trim()
+                                .parse()
+                                .unwrap())
+              .collect()
+    } else {
+        stdin().lock()
+               .lines()
+               .map(|depth| depth.unwrap()
+                                 .trim()
+                                 .parse()
+                                 .unwrap())
+               .collect()
+    };
 
-    println!("{}", get_increments(&depth_vector));
+    println!("Answer to Part One : {}", get_increments(&depth_vector));
 }
 
 fn get_increments(depth_vector: &Vec<u32>) -> u32 {
