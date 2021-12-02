@@ -48,11 +48,14 @@ fn main() {
 
     let (h_pos, depth) = calculate_position(&commands_vector);
     println!("Answer to Part One : {}", h_pos * depth);
+
+    let (h_pos, depth, _) = calculate_pos_and_aim(&commands_vector);
+    println!("Answer to Part Two : {}", h_pos * depth);
 }
 
 fn calculate_position(commands_vector: &Vec<Command>) -> (i32, i32) {
 
-    let mut h_pos:i32 = 0;
+    let mut h_pos: i32 = 0;
     let mut depth: i32 = 0;
 
     for cmd in commands_vector {
@@ -73,4 +76,31 @@ fn calculate_position(commands_vector: &Vec<Command>) -> (i32, i32) {
     }
 
     (h_pos, depth)
+}
+
+fn calculate_pos_and_aim(commands_vector: &Vec<Command>) -> (i32, i32, i32) {
+
+    let mut h_pos: i32 = 0;
+    let mut depth: i32 = 0;
+    let mut aim: i32 = 0;
+
+    for cmd in commands_vector {
+        match cmd {
+            Command::FORWARD(units) => {
+                let units = *units as i32;
+                h_pos += units;
+                depth += aim * units;
+            },
+            Command::DOWN(units) => {
+                let units = *units as i32;
+                aim += units;
+            },
+            Command::UP(units) => {
+                let units = *units as i32;
+                aim -= units;
+            }
+        }
+    }
+
+    (h_pos, depth, aim)
 }
