@@ -43,13 +43,6 @@ fn main() {
         boards.push(get_next_board(&mut lines));
     }
 
-    /*
-    println!("# of Boards: {}\n", boards.len());
-    println!("Board #1:\n{:?}\n", boards[0]);
-    println!("Board #2:\n{:?}\n", boards[1]);
-    println!("Board #3:\n{:?}\n", boards[2]);
-    */
-
     let draws: Vec<u8> = lines.first()
                               .unwrap()
                               .split(',')
@@ -58,22 +51,17 @@ fn main() {
                                         .unwrap())
                               .collect();
 
-    /*
-    println!("Draws : {:?}\n", draws);
-    */
-
     let (winner, last_draw) = bingo(&mut boards, &draws);
-    /*
-    println!("Winner index : {}", winner);
-    println!("Last Draw : {}\n", last_draw);
-    println!("Winner board:\n{:?}", boards[winner]);
-    */
     let sum = sum_unmarked(&boards[winner]);
     let score = sum * last_draw as u32;
-    /*
-    println!("Sum  : {}", sum);
-    */
     println!("Answer to Part One : {}", score);
+
+    reset_boards(&mut boards);
+
+    let (winner, last_draw) = bingo_lastwin(&mut boards, &draws);
+    let sum = sum_unmarked(&boards[winner]);
+    let score = sum * last_draw as u32;
+    println!("Answer to Part Two : {}", score);
 }
 
 fn get_next_board(lines: &mut Vec<String>) -> Board {
@@ -104,6 +92,38 @@ fn bingo(boards: &mut Vec<Board>, draws: &Vec<u8>) -> (usize, u8) {
         for (idx, board) in boards.iter().enumerate() {
             if has_won(board) == true {
                 return (idx, *draw);
+            }
+        }
+    }
+
+    (usize::MAX, u8::MAX)
+}
+
+fn bingo_lastwin(boards: &mut Vec<Board>, draws: &Vec<u8>) -> (usize, u8) {
+
+    let len = boards.len();
+    let mut winners = vec![false; len];
+
+    for draw in draws {
+        mark(boards, *draw);
+
+        for (idx, board) in boards.iter().enumerate() {
+
+            if winners[idx] == false && has_won(board) == true {
+                winners[idx] = true;
+
+                /* Did every board win? */
+                let mut all_won = true;
+                for i in 0..len {
+                    if winners[i] == false {
+                        all_won = false;
+                        break;
+                    }
+                }
+
+                if all_won == true {
+                    return (idx, *draw);
+                }
             }
         }
     }
@@ -171,4 +191,14 @@ fn sum_unmarked(board: &Board) -> u32 {
     }
 
     sum
+}
+
+fn reset_boards(boards: &mut Vec<Board>) {
+    for board in boards {
+        for row in 0..5 {
+            for col in 0..5 {
+                board[row][col].marked = false;
+            }
+        }
+    }
 }
