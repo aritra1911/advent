@@ -15,36 +15,53 @@ fn main() {
         input
     };
 
-    let orig_state: Vec<u8> = input.split(',')
+    let init_state: Vec<u8> = input.split(',')
                                    .map(|x| x.trim().parse().unwrap())
                                    .collect();
 
-    let mut state = orig_state.clone();
     let days = 80;
+    let mut freq_state = init_freq_state(&init_state);
     for _ in 0..days {
-        spawn(&mut state);
+        spawn(&mut freq_state);
     }
-    println!("Answer to Part One : {}", state.len());
+    let n_fishes: u64 = freq_state.iter().sum();
+    println!("Answer to Part One : {}", n_fishes);
 
-    let mut state = orig_state.clone();
     let days = 256;
+    let mut freq_state = init_freq_state(&init_state);
     for _ in 0..days {
-        spawn(&mut state);
+        spawn(&mut freq_state);
     }
-    println!("Answer to Part Two : {}", state.len());
+    let n_fishes: u64 = freq_state.iter().sum();
+    println!("Answer to Part Two : {}", n_fishes);
 }
 
-fn spawn(state: &mut Vec<u8>) {
+fn init_freq_state(state: &Vec<u8>) -> [u64; 9] {
 
-    let n_fishes = state.len();
+    let mut freq_state = [0u64; 9];
 
-    for i in 0..n_fishes {
-
-        if state[i] == 0 {
-            state[i] = 6;
-            state.push(8);
-        } else {
-            state[i] -= 1;
-        }
+    /* Calculate frequencies of fishes having same
+     * no. of days left to create a new fish */
+    for fish in state {
+        freq_state[*fish as usize] += 1;
     }
+
+    freq_state
+}
+
+fn spawn(freq_state: &mut [u64]) {
+
+    /* Save the # of fishes about to create a new fish */
+    let new_fishes = freq_state[0];
+
+    /* Reduce days of every fish by shifting */
+    for i in 0..8 {
+        freq_state[i] = freq_state[i + 1];
+    }
+
+    /* The fishes that created a new fish goes back to 6 days */
+    freq_state[6] += new_fishes;
+
+    /* The new fishes get 8 days */
+    freq_state[8] = new_fishes;
 }
