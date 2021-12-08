@@ -5,8 +5,6 @@ use std::str::FromStr;
 use std::num::ParseIntError;
 use itertools::Itertools;
 
-const DIGITS: usize = 4;
-
 #[derive(Clone, Debug)]
 struct Entry {
     patterns: Vec<String>,
@@ -55,10 +53,10 @@ fn main() {
     };
 
     let unique_digits = part1(&entries);
-    //println!("Answer to Part One : {}", unique_digits);
+    println!("Answer to Part One : {}", unique_digits);
 
     let sum = part2(&entries);
-    //println!("Answer to Part Two : {}", sum);
+    println!("Answer to Part Two : {}", sum);
 }
 
 fn part1(entries: &Vec<Entry>) -> u64 {
@@ -92,14 +90,63 @@ fn get_unique_digits(output: &Vec<String>) -> u64 {
 
 fn part2(entries: &Vec<Entry>) -> u64 {
 
+    let mut sum = 0;
     for entry in entries {
-        let map = remap(&entry.patterns);
+        let segments_map = remap(&entry.patterns);
+
+        /* segment -> a b c d e f g *
+         *   index -> 0 1 2 3 4 5 6 */
+
+        let mut code = 0;
+        for digit in &entry.output {
+            let sig_code = get_bin_code(digit, &segments_map);
+            //println!("Signal Code : {:b}", sig_code);
+            let dec_digit = match sig_to_digit(sig_code) {
+                Some(d) => d,
+                None => unreachable!(),
+            };
+            code = code * 10 + dec_digit as u64;
+        }
+        sum += code;
     }
 
-    0
+    sum
 }
 
-fn remap(patterns: &Vec<String>) -> [usize; 10] {
+fn get_bin_code(digit: &String, segments_map: &[char; 7]) -> u8 {
+
+    let mut code = 0u8;
+
+    for i in 0..7 {
+        if digit.contains(segments_map[i]) {
+            code |= 1 << i;
+        }
+    }
+
+    code
+}
+
+fn sig_to_digit(signal_code: u8) -> Option<u8> {
+
+    /* segments -> g f e d c b a *
+     *     bits -> 6 5 4 3 2 1 0 */
+
+    match signal_code {
+        0b1110111 => Some(0),
+        0b0100100 => Some(1),
+        0b1011101 => Some(2),
+        0b1101101 => Some(3),
+        0b0101110 => Some(4),
+        0b1101011 => Some(5),
+        0b1111011 => Some(6),
+        0b0100101 => Some(7),
+        0b1111111 => Some(8),
+        0b1101111 => Some(9),
+        _ => None
+    }
+}
+
+fn remap(patterns: &Vec<String>) -> [char; 7] {
 
     let mut map = [0; 10];  /* Table of indexes */
     let mut segments = ['a'; 7];
@@ -132,9 +179,7 @@ fn remap(patterns: &Vec<String>) -> [usize; 10] {
     }
     i = 0;
 
-    println!("Top Segment : {}", segments[0]);
     let mut possible_rights = (possible_rights[0], possible_rights[1]);
-    println!("Possible Rights : {:?}", possible_rights);
 
     /* Comparing segments for 4 and 7 gives possibilities
      * for top right and bottom right segments */
@@ -147,7 +192,6 @@ fn remap(patterns: &Vec<String>) -> [usize; 10] {
     i = 0;
 
     let mut possible_mids = (possible_mids[0], possible_mids[1]);
-    println!("Possible Mids : {:?}", possible_mids);
 
     /* Possibilities for bottom-left and bottom segments can be inferred
      * by segments missing from digit 8 and other possibility lists */
@@ -160,10 +204,8 @@ fn remap(patterns: &Vec<String>) -> [usize; 10] {
             i += 1;
         }
     }
-    i = 0;
 
     let mut possible_bottoms = (possible_bottoms[0], possible_bottoms[1]);
-    println!("Possible Bottoms : {:?}", possible_bottoms);
 
     /* a b c d e f g *
      * 0 1 2 3 4 5 6 */
@@ -228,7 +270,7 @@ fn remap(patterns: &Vec<String>) -> [usize; 10] {
                     map[2] = i;
 
                     if !collapsed_rights {
-                        possible_rights = if pattern.contains(q) { (p, q) }
+                        possible_rights = if pattern.contains(p) { (p, q) }
                                           else { (q, p) };
                         collapsed_rights = true;
                         segments[2] = possible_rights.0;
@@ -302,14 +344,5 @@ fn remap(patterns: &Vec<String>) -> [usize; 10] {
         if collapsed_rights && collapsed_bottoms && collapsed_mids { break; }
     }
 
-
-    println!("             Map : {:?}", map);
-    println!("        Segments : {:?}", segments);
-    println!("Possible  Rights : {:?}", possible_rights);
-    println!("Possible    Mids : {:?}", possible_mids);
-    println!("Possible Bottoms : {:?}", possible_bottoms);
-
-    println!();
-
-    map
+    segments
 }
