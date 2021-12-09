@@ -15,7 +15,7 @@ fn main() {
                               .trim()
                               .to_string()
                               .chars()
-                              .map(|c| c as u8 - '0' as u8)
+                              .map(|c| c.to_digit(10).unwrap() as u8)
                               .collect())
               .collect()
     } else {
@@ -25,7 +25,7 @@ fn main() {
                                .trim()
                                .to_string()
                                .chars()
-                               .map(|c| c as u8 - '0' as u8)
+                               .map(|c| c.to_digit(10).unwrap() as u8)
                                .collect())
                .collect()
     };
