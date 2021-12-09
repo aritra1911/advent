@@ -37,15 +37,18 @@ fn main() {
     println!("Answer to Part One : {}", sum);
 
     let mut basin_sizes = Vec::new();
+    let map_height = heightmap.len();
+    let map_width = heightmap[0].len();
+    let mut visited = vec![vec![false; map_width]; map_height];
     for point in low_points {
-        let mut visited = Vec::new();
         let size = get_basin_size(&heightmap, point, &mut visited);
         basin_sizes.push(size);
     }
 
     basin_sizes.sort_unstable();
-    basin_sizes.reverse();
-    let product = basin_sizes[0] * basin_sizes[1] * basin_sizes[2];
+    let mut product = basin_sizes.pop().unwrap();
+    product *= basin_sizes.pop().unwrap();
+    product *= basin_sizes.pop().unwrap();
     println!("Answer to Part Two : {}", product);
 }
 
@@ -87,18 +90,18 @@ fn get_low_points(heightmap: &Vec<Vec<u8>>) -> Vec<(usize, usize)> {
 }
 
 fn get_basin_size(heightmap: &Vec<Vec<u8>>, point: (usize, usize),
-                  visited: &mut Vec<(usize, usize)>) -> u64 {
+                  visited: &mut Vec<Vec<bool>>) -> u64 {
 
     let (i, j) = point;
     let height = heightmap[i][j];
     let map_height = heightmap.len();
     let map_width = heightmap[0].len();
 
-    if height == 9 || visited.contains(&point) {
+    if height == 9 || visited[i][j] {
         return 0;
     }
 
-    visited.push(point);
+    visited[i][j] = true;
     let mut size = 1;
 
     /* Up */

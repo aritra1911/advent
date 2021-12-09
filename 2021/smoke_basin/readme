@@ -1,0 +1,24 @@
+❯ time target/release/smoke_basin dummy_input.txt
+Answer to Part One : 15
+Answer to Part Two : 1134
+target/release/smoke_basin dummy_input.txt  0.00s user 0.00s system 75% cpu 0.002 total
+
+❯ time target/release/smoke_basin input.txt
+Answer to Part One : 548
+Answer to Part Two : 786048
+target/release/smoke_basin input.txt  0.00s user 0.00s system 80% cpu 0.003 total
+
+❯ time target/release/smoke_basin 9-4096.in
+Answer to Part One : 218
+Answer to Part Two : 167990940
+target/release/smoke_basin 9-4096.in  0.14s user 0.02s system 97% cpu 0.162 total
+
+❯ time target/release/smoke_basin 9-4096-2.in
+Answer to Part One : 149706
+Answer to Part Two : 4971158490375
+target/release/smoke_basin 9-4096-2.in  0.63s user 0.02s system 98% cpu 0.657 total
+
+❯ time target/release/smoke_basin 9-4096-4.in
+Answer to Part One : 152649
+Answer to Part Two : 101367520960
+target/release/smoke_basin 9-4096-4.in  0.61s user 0.02s system 99% cpu 0.637 total
