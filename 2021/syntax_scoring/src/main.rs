@@ -4,7 +4,7 @@ use std::io::{stdin, BufRead, BufReader};
 
 const BRACKET_TYPES: usize = 4;
 
-#[derive(Debug)]
+#[derive(Copy, Clone, Debug)]
 enum Bracket {
     PARENTHESIS,
     SQUARE,
@@ -19,113 +19,45 @@ const SCORE: [u64; BRACKET_TYPES] = [
     25137,
 ];
 
-fn is_corrupted(line: &String) -> (Option<Bracket>, Vec<char>) {
+fn check(line: &String) -> (Option<Bracket>, Vec<char>) {
 
-    let mut count = [0u64; BRACKET_TYPES];
-    let mut expected_closing = '\0';
     let mut closings = Vec::new();
 
     for c in line.chars() {
         match c {
+            /* Opening / Pushes */
+            '(' | '[' | '{' | '<' => {
+                let closing_char = match c {
+                    '(' => ')',
+                    '[' => ']',
+                    '{' => '}',
+                    '<' => '>',
+                    _ => unreachable!(),
+                };
+                closings.push(closing_char);
+            }
 
-            /* Opening / Insertions */
-            '(' => {
-                count[Bracket::PARENTHESIS as usize] += 1;
-                if expected_closing != '\0' {
-                    closings.push(expected_closing);
-                }
-                expected_closing = ')';
-            },
-            '[' => {
-                count[Bracket::SQUARE as usize] += 1;
-                if expected_closing != '\0' {
-                    closings.push(expected_closing);
-                }
-                expected_closing = ']';
-            },
-            '{' => {
-                count[Bracket::CURLY as usize] += 1;
-                if expected_closing != '\0' {
-                    closings.push(expected_closing);
-                }
-                expected_closing = '}';
-            },
-            '<' => {
-                count[Bracket::ANGULAR as usize] += 1;
-                if expected_closing != '\0' {
-                    closings.push(expected_closing);
-                }
-                expected_closing = '>';
-            },
+            /* Closing / Pops */
+            ')' | ']' | '}' | '>' => {
+                let bracket = match c {
+                    ')' => Bracket::PARENTHESIS,
+                    ']' => Bracket::SQUARE,
+                    '}' => Bracket::CURLY,
+                    '>' => Bracket::ANGULAR,
+                    _ => unreachable!(),
+                };
 
-            /* Closing / Deletions */
-            ')' => {
-                if count[Bracket::PARENTHESIS as usize] > 0 &&
-                   expected_closing == c {
-                    count[Bracket::PARENTHESIS as usize] -= 1;
-                    expected_closing = match closings.pop() {
-                        Some(a) => a,
-                        None => '\0',
-                    }
-                } else {
-                    if expected_closing != '\0' {
-                        closings.push(expected_closing);
-                    }
-                    return (Some(Bracket::PARENTHESIS), closings);
+                match closings.last() {
+                    Some(&a) => if a != c {
+                        return (Some(bracket), closings);
+                    },
+                    None => unreachable!(),
                 }
-            },
-            ']' => {
-                if count[Bracket::SQUARE as usize] > 0 &&
-                   expected_closing == c {
-                    count[Bracket::SQUARE as usize] -= 1;
-                    expected_closing = match closings.pop() {
-                        Some(a) => a,
-                        None => '\0',
-                    }
-                } else {
-                    if expected_closing != '\0' {
-                        closings.push(expected_closing);
-                    }
-                    return (Some(Bracket::SQUARE), closings);
-                }
-            },
-            '}' => {
-                if count[Bracket::CURLY as usize] > 0 &&
-                   expected_closing == c {
-                    count[Bracket::CURLY as usize] -= 1;
-                    expected_closing = match closings.pop() {
-                        Some(a) => a,
-                        None => '\0',
-                    }
-                } else {
-                    if expected_closing != '\0' {
-                        closings.push(expected_closing);
-                    }
-                    return (Some(Bracket::CURLY), closings);
-                }
-            },
-            '>' => {
-                if count[Bracket::ANGULAR as usize] > 0 &&
-                   expected_closing == c {
-                    count[Bracket::ANGULAR as usize] -= 1;
-                    expected_closing = match closings.pop() {
-                        Some(a) => a,
-                        None => '\0',
-                    }
-                } else {
-                    if expected_closing != '\0' {
-                        closings.push(expected_closing);
-                    }
-                    return (Some(Bracket::ANGULAR), closings);
-                }
+                closings.pop();
             },
 
             _ => unreachable!(),
         }
-    }
-
-    if expected_closing != '\0' {
-        closings.push(expected_closing);
     }
 
     (None, closings)
@@ -136,7 +68,7 @@ fn part1(lines: &Vec<String>) -> u64 {
     let mut errors = [0u64; BRACKET_TYPES];
 
     for line in lines {
-        if let (Some(bracket), _) = is_corrupted(line) {
+        if let (Some(bracket), _) = check(line) {
             errors[bracket as usize] += 1;
         }
     }
@@ -153,28 +85,22 @@ fn part2(lines: &Vec<String>) -> u64 {
     let mut scores = Vec::new();
 
     for line in lines {
-        match is_corrupted(line) {
-            (None, mut closings) => {
-                if closings.len() > 0 {
-                    /* Incomplete line */
-                    let mut score = 0;
+        if let (None, mut closings) = check(line) {
+            if closings.len() > 0 {
+                /* Incomplete line */
 
-                    while let Some(c) = closings.pop() {
-                        score *= 5;
-                        score += match c {
-                            ')' => 1,
-                            ']' => 2,
-                            '}' => 3,
-                            '>' => 4,
-                            _ => unreachable!(),
-                        };
-                    }
-
-                    scores.push(score);
+                let mut score = 0;
+                while let Some(c) = closings.pop() {
+                    score = score * 5 + match c {
+                        ')' => 1,
+                        ']' => 2,
+                        '}' => 3,
+                        '>' => 4,
+                        _ => unreachable!(),
+                    };
                 }
-            },
-
-            _ => { },
+                scores.push(score);
+            }
         }
     }
 
