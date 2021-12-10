@@ -80,7 +80,7 @@ fn part1(lines: &Vec<String>) -> u64 {
         .sum()
 }
 
-fn part2(lines: &Vec<String>) -> u64 {
+fn part2(lines: &Vec<String>) -> u128 {
 
     let mut scores = Vec::new();
 

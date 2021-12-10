@@ -1,0 +1,14 @@
+❯ time target/release/syntax_scoring dummy_input.txt
+Answer to Part One : 26397
+Answer to Part Two : 288957
+target/release/syntax_scoring dummy_input.txt  0.00s user 0.00s system 80% cpu 0.002 total
+
+❯ time target/release/syntax_scoring input.txt
+Answer to Part One : 316851
+Answer to Part Two : 2182912364
+target/release/syntax_scoring input.txt  0.00s user 0.00s system 80% cpu 0.002 total
+
+❯ time target/release/syntax_scoring 7predb
+Answer to Part One : 28477455
+Answer to Part Two : 70132379000275076832846762473
+target/release/syntax_scoring 7predb  0.88s user 0.06s system 99% cpu 0.945 total
