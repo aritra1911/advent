@@ -109,7 +109,7 @@ fn part2(lines: &Vec<String>) -> u64 {
     let len = scores.len();
     assert_eq!(len & 1, 1);
 
-    scores.sort();
+    scores.sort_unstable();
     scores[len >> 1]
 }
 
