@@ -35,7 +35,7 @@ fn check(line: &String) -> (Option<Bracket>, Vec<char>) {
                     _ => unreachable!(),
                 };
                 closings.push(closing_char);
-            }
+            },
 
             /* Closing / Pops */
             ')' | ']' | '}' | '>' => {
