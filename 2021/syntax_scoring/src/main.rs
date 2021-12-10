@@ -76,7 +76,7 @@ fn part1(lines: &Vec<String>) -> u64 {
     errors
         .iter()
         .enumerate()
-        .map(|(b, count)| count * SCORE[b as usize])
+        .map(|(i, count)| count * SCORE[i])
         .sum()
 }
 
