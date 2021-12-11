@@ -93,10 +93,44 @@ fn part1(energy_map: &mut [u8], steps:u64) -> u64 {
                 total_flashes += flash(energy_map, (i, j));
             }
         }
-        //dump_energy_map(energy_map, step + 1);
     }
 
     total_flashes
+}
+
+fn part2(energy_map: &mut [u8]) -> u64 {
+
+    let mut step = 0;
+
+    loop {
+
+        step += 1;
+
+        step_octopuses(energy_map);
+
+        for i in 0..GRID_DIM {
+            for j in 0..GRID_DIM {
+                let flashes = flash(energy_map, (i, j));
+                if flashes as usize == OCTOPUSES {
+                    return step;
+                }
+            }
+        }
+    }
+}
+
+fn linearize(input: &Vec<Vec<u8>>) -> [u8; OCTOPUSES] {
+
+    let mut energy_map = [0u8; OCTOPUSES];
+
+    /* Copy vector to a linear array which is way easier to work with */
+    for i in 0..GRID_DIM {
+        for j in 0..GRID_DIM {
+            energy_map[i * GRID_DIM + j] = input[i][j];
+        }
+    }
+
+    energy_map
 }
 
 fn main() {
@@ -127,17 +161,11 @@ fn main() {
             .collect()
     };
 
-    /* Copy vector to a linear array which is way easier to work with */
-    let mut energy_map = [0u8; GRID_DIM * GRID_DIM];
-    for i in 0..GRID_DIM {
-        for j in 0..GRID_DIM {
-            energy_map[i * GRID_DIM + j] = input[i][j];
-        }
-    }
-
+    let mut energy_map = linearize(&input);
     let flashes = part1(&mut energy_map, 100);
     println!("Answer to Part One : {}", flashes);
-    /*
+
+    energy_map = linearize(&input);
+    let step = part2(&mut energy_map);
     println!("Answer to Part Two : {}", step);
-    */
 }
