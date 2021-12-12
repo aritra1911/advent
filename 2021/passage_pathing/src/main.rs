@@ -5,28 +5,8 @@ use std::str::FromStr;
 use std::num::ParseIntError;
 use itertools::Itertools;
 
-#[derive(Clone, Debug)]
 struct Path(String, String);
 
-/*
- * Path("start", "A")
- * Path("start", "b")
- * Path("A", "c")
- * Path("A", "b")
- * Path("b", "d")
- * Path("A", "end")
- * Path("b", "end")
- */
-
-/*   idx      0 1 2 3 4   5
- *  cave  start A b c d end
- * conns      1 0 0 1 2   1
- *            2 3 1       2
- *              2 4
- *              5 5
- */
-
-#[derive(Clone, Debug)]
 struct Cave {
     name: String,
     connected_caves: Vec<usize>,
@@ -55,20 +35,27 @@ fn cave_is_small(caves: &Vec<Cave>, idx: usize) -> bool {
         .is_lowercase()
 }
 
-fn bfs(caves: &Vec<Cave>, idx: usize, visited: Vec<usize>) -> u64 {
+fn bfs(  caves: &Vec<Cave>,   idx: usize,
+       visited: Vec<u8>,    times: u8) -> u64 {
 
     if caves[idx].name == "end" {
         return 1;
     }
 
     /* Append the fact that this cave has been visited,
-     * but push if and only if the cave is small */
+     * but push if and only if the cave is small.
+     * Also if we visit a cave `times` times, then
+     * `next_time` shall be `times` - 1. */
     let mut visited = visited.clone();
+    let mut next_times = times;
     if cave_is_small(caves, idx) {
-        visited.push(idx);
+        visited[idx] += 1;
+        if times > 1 && visited[idx] == times {
+            next_times -= 1;
+        }
     }
 
-    /* Get queue of connected caves to visit */
+    /* Get queue of connected caves to visit. */
     let mut queue = caves[idx].connected_caves.clone();
 
     let mut distinct_paths = 0;
@@ -76,14 +63,11 @@ fn bfs(caves: &Vec<Cave>, idx: usize, visited: Vec<usize>) -> u64 {
         match queue.pop() {
             Some (idx) => {
                 /* Check if already visited in case of small cave */
-                if cave_is_small(caves, idx) {
-                    if !visited.contains(&idx) {
-                        distinct_paths += bfs(caves, idx, visited.clone());
-                    } else {
-                        continue;
-                    }
-                } else {
-                    distinct_paths += bfs(caves, idx, visited.clone());
+                if { let is_small = cave_is_small(caves, idx);
+                     !is_small || (is_small && visited[idx] < next_times) } {
+
+                    distinct_paths +=
+                        bfs(caves, idx, visited.clone(), next_times);
                 }
             },
 
@@ -136,23 +120,41 @@ fn main() {
         let Path(start, end) = path;
         let i = get_cave_index(&mut caves, &start);
         let j = get_cave_index(&mut caves, &end);
-        caves[i].connected_caves.push(j);
-        caves[j].connected_caves.push(i);
+
+        /* Prevent paths back to "start" cave, and
+         * prevent paths from "end" cave. */
+        if caves[j].name != "start" && caves[i].name != "end" {
+            caves[i].connected_caves.push(j);
+        }
+        if caves[i].name != "start" && caves[j].name != "end" {
+            caves[j].connected_caves.push(i);
+        }
     }
+
+    /* How caves graph looks like:
+     *
+     * index      0 1 2 3 4   5
+     *  cave  start A b c d end
+     * conns      1 3 1 1 2
+     *            2 2 4
+     *              5 5
+     */
+
+    let n_caves = caves.len();
 
     /* Determine start index */
     let mut start_idx = 0;
-    for i in 0..caves.len() {
+    for i in 0..n_caves {
         if caves[i].name == "start" {
             start_idx = i;
         }
     }
 
     /* Apply BFS and let it do its magic */
-    let distinct_paths = bfs(&caves, start_idx, vec![start_idx, ]);
+
+    let distinct_paths = bfs(&caves, start_idx, vec![0; n_caves], 1);
     println!("Answer to Part One : {}", distinct_paths);
 
-    /*
-    println!("Answer to Part Two : {}", count);
-    */
+    let distinct_paths = bfs(&caves, start_idx, vec![0; n_caves], 2);
+    println!("Answer to Part Two : {}", distinct_paths);
 }
