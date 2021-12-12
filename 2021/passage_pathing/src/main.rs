@@ -1,6 +1,6 @@
 use std::env;
 use std::fs::File;
-use std::io::{stdin, BufRead, BufReader};
+use std::io::{stdin, BufRead, BufReader, Write};
 use std::str::FromStr;
 use std::num::ParseIntError;
 use itertools::Itertools;
@@ -114,10 +114,30 @@ fn main() {
                .collect()
     };
 
+    /* We wanna generate a GraphViz dot file
+     * for the graph visualization. */
+    let mut graph_file = None;
+    if args.len() > 3 && args[2] == "-g" {
+        graph_file = Some(File::create(&args[3]).unwrap());
+    }
+
+    /* Begin the dot file */
+    if let Some(ref mut file) = graph_file {
+        file.write_all(b"strict graph {\n").unwrap();
+    }
+
     /* Prepare caves graph */
     let mut caves = Vec::new();
     for path in paths {
         let Path(start, end) = path;
+
+        /* Write the path to the dot file if we're asked to do that */
+        if let Some(ref mut file) = graph_file {
+            file.write_all(format!("    {} -- {}\n", start, end)
+                           .to_string().as_bytes()).unwrap();
+        }
+
+        /* Determine node indexes */
         let i = get_cave_index(&mut caves, &start);
         let j = get_cave_index(&mut caves, &end);
 
@@ -129,6 +149,11 @@ fn main() {
         if caves[i].name != "start" && caves[j].name != "end" {
             caves[j].connected_caves.push(i);
         }
+    }
+
+    /* End the dot file */
+    if let Some(ref mut file) = graph_file {
+        file.write_all(b"}\n").unwrap();
     }
 
     /* How caves graph looks like:

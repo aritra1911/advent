@@ -1,0 +1,12 @@
+❯ target/debug/passage_pathing input.txt -g graph.dot
+Answer to Part One : 4773
+Answer to Part Two : 116985
+
+❯ file graph.dot
+graph.dot: ASCII text
+
+# Convert to svg
+❯ dot -Tsvg -o graph.svg graph.dot
+
+❯ file graph.svg
+graph.svg: SVG Scalable Vector Graphics image
