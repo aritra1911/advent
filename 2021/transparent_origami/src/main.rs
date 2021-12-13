@@ -1,6 +1,6 @@
 use std::env;
 use std::fs::File;
-use std::io::{stdin, BufRead, BufReader};
+use std::io::{stdin, BufRead, BufReader, Write};
 use itertools::Itertools;
 
 fn transform_points(points: &mut Vec<(u32, u32)>, fold: (char, u32)) {
@@ -19,7 +19,39 @@ fn transform_points(points: &mut Vec<(u32, u32)>, fold: (char, u32)) {
     points.dedup();
 }
 
+fn export_svg(points: &Vec<(u32, u32)>, filename: &str) {
 
+    const VIEW_WIDTH: &str = "1000";
+    const POINT_RADIUS: f32 = 0.6;
+    const POINT_COLOR: &str = "purple";
+
+    let mut svg_file = File::create(filename)
+        .expect(format!("Unable to create file `{}`.", filename).as_str());
+
+    let (mut max_x, mut max_y) = (0, 0);
+    for point in points {
+        let (x, y) = point;
+        if *x > max_x { max_x = *x; }
+        if *y > max_y { max_y = *y; }
+    }
+
+    svg_file.write_all(format!(
+        "<svg width=\"{}\" viewBox=\"{:.1} {:.1} {:.1} {:.1}\" \
+              xmlns=\"http://www.w3.org/2000/svg\">\n",
+        VIEW_WIDTH, -POINT_RADIUS, -POINT_RADIUS,
+        max_x as f32 + 2.0 * POINT_RADIUS, max_y as f32 + 2.0 * POINT_RADIUS
+    ).as_bytes()).unwrap();
+
+    for point in points {
+        let (x, y) = point;
+        svg_file.write_all(format!(
+            "  <circle cx=\"{}\" cy=\"{}\" r=\"{}px\" fill=\"{}\" />\n",
+            x, y, POINT_RADIUS, POINT_COLOR
+        ).as_bytes()).unwrap();
+    }
+
+    svg_file.write_all(b"</svg>\n").unwrap();
+}
 
 fn main() {
 
@@ -71,10 +103,9 @@ fn main() {
     for i in 1..folds.len() {
         transform_points(&mut points, folds[i]);
     }
-    println!("Answer to Part Two :");
-    for point in points {
-        /* TODO: Plot some graphics here instead */
-        print!("{:?}, ", point);
-    }
-    println!();
+
+    let filename = if args.len() > 2 { args[2].as_str() }
+                   else { "part2_dotmatrix.svg" };
+    export_svg(&points, filename);
+    println!("Answer to Part Two : saved as `{}`.", filename);
 }
