@@ -3,7 +3,7 @@ use std::fs::File;
 use std::io::{stdin, BufRead, BufReader, Write};
 use itertools::Itertools;
 
-fn transform_points(points: &mut Vec<(u32, u32)>, fold: (char, u32)) {
+fn transform_points(points: &mut Vec<(usize, usize)>, fold: (char, usize)) {
 
     for i in 0..points.len() {
         let (x, y) = points[i];
@@ -19,7 +19,7 @@ fn transform_points(points: &mut Vec<(u32, u32)>, fold: (char, u32)) {
     points.dedup();
 }
 
-fn export_svg(points: &Vec<(u32, u32)>, filename: &str) {
+fn export_svg(points: &Vec<(usize, usize)>, filename: &str) {
 
     const VIEW_WIDTH: &str = "1000";
     const POINT_RADIUS: f32 = 0.6;
@@ -53,6 +53,30 @@ fn export_svg(points: &Vec<(u32, u32)>, filename: &str) {
     svg_file.write_all(b"</svg>\n").unwrap();
 }
 
+fn print_ascii(points: &Vec<(usize, usize)>) {
+
+    let (mut max_x, mut max_y) = (0usize, 0usize);
+    for point in points {
+        let (x, y) = point;
+        if *x > max_x { max_x = *x; }
+        if *y > max_y { max_y = *y; }
+    }
+
+    let mut print_matrix = vec![vec![' '; max_x + 1]; max_y + 1];
+
+    for point in points {
+        let (x, y) = point;
+        print_matrix[*y][*x] = '#';
+    }
+
+    for line in print_matrix {
+        for c in line {
+            print!("{}", c);
+        }
+        println!();
+    }
+}
+
 fn main() {
 
     let args: Vec<String> = env::args().collect();
@@ -74,7 +98,7 @@ fn main() {
     };
 
     /* Parse points */
-    let mut points: Vec<(u32, u32)> = Vec::new();
+    let mut points: Vec<(usize, usize)> = Vec::new();
     let mut folds_idx = 0;
     for (i, line) in lines.iter().enumerate() {
         if line.is_empty() {
@@ -86,7 +110,7 @@ fn main() {
     }
 
     /* Parse fold instructions */
-    let mut folds: Vec<(char, u32)> = Vec::new();
+    let mut folds: Vec<(char, usize)> = Vec::new();
     for i in folds_idx..lines.len() {
         let mut stripped_line = lines[i].chars().skip(11);
         let axis = stripped_line.next().unwrap();
@@ -104,8 +128,13 @@ fn main() {
         transform_points(&mut points, folds[i]);
     }
 
-    let filename = if args.len() > 2 { args[2].as_str() }
-                   else { "part2_dotmatrix.svg" };
-    export_svg(&points, filename);
-    println!("Answer to Part Two : saved as `{}`.", filename);
+    if args.len() > 2 && args[2] == "-svg" {
+        let filename = if args.len() > 3 { args[3].as_str() }
+                       else { "part2_dotmatrix.svg" };
+        export_svg(&points, filename);
+        println!("Answer to Part Two : saved as `{}`.", filename);
+    } else {
+        println!("Answer to Part Two :");
+        print_ascii(&points);
+    }
 }
