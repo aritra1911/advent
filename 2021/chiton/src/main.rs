@@ -61,16 +61,33 @@ fn part1(risk_levels: &Vec<Vec<u8>>) -> u64 {
     let rows = risk_levels.len();
     let cols = risk_levels[0].len();
 
-    /*
+    distances[rows - 1][cols - 1]
+}
+
+fn part2(risk_levels: &Vec<Vec<u8>>) -> u64 {
+
+    let rows = risk_levels.len();
+    let cols = risk_levels[0].len();
+    let mut full_risk_levels = vec![vec![0; cols * 5]; rows * 5];
+
     for i in 0..rows {
         for j in 0..cols {
-            print!(" {:2} ", distances[i][j]);
+            let mut risk_level_rows = risk_levels[i][j];
+            for k in 0..5 {
+                let mut risk_level_cols = risk_level_rows;
+                for l in 0..5 {
+                    full_risk_levels[k*rows + i][l*cols + j] = risk_level_cols;
+                    risk_level_cols = if risk_level_cols == 9 { 1 }
+                                      else { risk_level_cols + 1 };
+                }
+                risk_level_rows = if risk_level_rows == 9 { 1 }
+                                  else { risk_level_rows + 1 };
+            }
         }
-        println!();
     }
-    */
 
-    distances[rows - 1][cols - 1]
+    let distances = dijkstra(&full_risk_levels, (0, 0));
+    distances[5*rows - 1][5*cols - 1]
 }
 
 fn main() {
@@ -105,4 +122,7 @@ fn main() {
 
     let shortest_distance = part1(&input);
     println!("Answer to Part One : {}", shortest_distance);
+
+    let shortest_distance = part2(&input);
+    println!("Answer to Part Two : {}", shortest_distance);
 }
